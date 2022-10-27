@@ -1,10 +1,18 @@
+import org.w3c.dom.DOMImplementation;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Text;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 
 public class Main {
-    public static void main(String[] args) throws IOException {
-        //datos de biblioteca, se generar 5 libros aleatorios, se pueden añadir más ,eliminar y editar
-        //fichero con todos los libros de la biblioteca,fichero con nombre de usuarios con libros prestados y lista de personas a las que no prestar libros, si se mete ese nombre no se permitira que se preste
-        //XML de todos los libros en la biblioteca
+    public static void main(String[] args) throws IOException, ParserConfigurationException, TransformerException {
 
         llenar();
 
@@ -49,8 +57,7 @@ public class Main {
 
     }//si no hay datos se generan 5 libros
 
-
-    private static void menu() throws IOException {
+    public static void menu() throws IOException, ParserConfigurationException, TransformerException {
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         boolean avance = false;
@@ -59,7 +66,7 @@ public class Main {
 
         do {
             System.out.println("Bienvenido a la biblioteca ¿que vas a hacer hoy?\n 1.-registrar nuevo libro\n2.-dar de baja un libro\n3.-modificar libro\n4.-tomar prestado libro\n5.-Lista de todos los libros" +
-                    "\n6.-lista de betados\n7.-lista libros prestados\n8.-devolver libro\n9.-Lista Clientes\n10.-añadir cliente\n11.-Eliminar cliente\n12.-Salir!");
+                    "\n6.-lista de betados\n7.-lista libros prestados\n8.-devolver libro\n9.-Lista Clientes\n10.-añadir cliente\n11.-Eliminar cliente\n12.-Crear XML\n13.-Saliste!");
             try {
                 opcion = Integer.parseInt(reader.readLine());
             } catch (NumberFormatException e) {
@@ -68,31 +75,30 @@ public class Main {
                 throw new RuntimeException(e);
             }
 
-            if (opcion > 0 && opcion <= 12) {
+            if (opcion > 0 && opcion <= 13) {
                 avance = true;
             } else {
                 System.out.println("Mete un valor valido");
             }
         } while (!avance);
         if (opcion == 1) {
-            crear(reader);
+            Libro.crear(reader);
             menu();
         }
         if (opcion == 2) {
-            eliminar(reader);
+           Libro. eliminar(reader);
             menu();
         }
         if (opcion == 3) {
-            editar(reader);
+           Libro. editar(reader);
             menu();
         }
         if (opcion == 4) {
-            prestar(reader);
+          Libro.  prestar(reader);
             menu();
         }
         if (opcion == 5) {
-            //eliminarL(reader);
-            TodosLibros();
+            Libro.TodosLibros();
             menu();
         }
         if (opcion == 6) {
@@ -100,410 +106,83 @@ public class Main {
 
         }
         if (opcion == 7) {
-            librosPrestados();
+            Libro.librosPrestados();
             menu();
         }
         if (opcion == 8) {
-            devolver();
+           Libro. devolver(reader);
             menu();
         }
         if (opcion == 9) {
-            ListaClientes();
+           Cliente. ListaClientes();
             menu();
         }
         if (opcion == 10) {
-            Acliente(reader);
+           Cliente. Acliente(reader);
             menu();
         }
         if (opcion == 11) {
-            EliCliente(reader);
+            Cliente.EliCliente(reader);
             menu();
         }
         if (opcion == 12) {
             System.out.println("Saliste ;)");
         }
+        if(opcion ==13){
+            crearXMLlibro();
+            crearXMLcliente();
+            menu();
+
+        }
     }//menu principal del usuario
 
-    //FUNCIONES CLIENTES
-    private static void ListaClientes() throws IOException {
-        RandomAccessFile raf = new RandomAccessFile(".//Clientes.dat", "rw");
-
-        if (raf.length() == 0) {
-            System.out.println("no hay clientes registrados aun");
-        } else {
-
-            char[] nombres = new char[20];
-            char a;
-            int LibrosM;
-            int pos = 0, id;
-
-
-            try {
-                while (true) {
-                    raf.seek(pos);
-                    id = raf.readInt();
-                    for (int i = 0; i < nombres.length; i++) {
-                        a = raf.readChar();
-                        nombres[i] = a;
-
-                    }
-                    LibrosM = raf.readInt();
-
-                    String nombres2 = new String(nombres);
-
-
-                    if (id != 0) {
-                        System.out.println("ID: " + id + " nombre: " + nombres2.trim() + " Nº libros prestados: " + LibrosM);
-
-                    }
-
-                    if (raf.getFilePointer() == raf.length()) {
-                        break;
-                    } else {
-                        pos += 48;//diferente cantidad
-                    }
-
-
-                }
-            } catch (
-                    IOException e) {
-                System.out.println("Ya se han mostrado todos los clientes");
-            }
-        }
-
-    } //funciona
-
-    private static void Acliente(BufferedReader reader) throws IOException {
-        int libros = 0;
-
-
-        //añadir datos
-        RandomAccessFile fichero = new RandomAccessFile(".//Clientes.dat", "rw");
-        RandomAccessFile raf = new RandomAccessFile(".//Clientes.dat", "r");
-
-        long tamanyo = raf.length();
-
-
-
-        if (tamanyo == 0) {
-            String nombre;
-            do {
-                System.out.println("escribe el nombre del nuevo cliente");
-                nombre = reader.readLine();
-
-            } while (nombre.length() < 2);
-
-            //insertar nuevos datos
-            long ids = fichero.length();
-            fichero.seek(ids);//volverse a posicionar al final
-
-            StringBuffer buff3;
-
-
-            buff3 = new StringBuffer(nombre);
-            buff3.setLength(20);
-
-
-            fichero.writeInt(1);
-            fichero.writeChars(buff3.toString());
-            fichero.writeInt(libros);
-
-
-            fichero.close();
-            raf.close();
-
-            System.out.println("Cliente registrado con exito");
-
-        } else {
-            //posicionarnos al final de los datos
-            int pos = 0;
-            int id = 0;
-            //coger el ultimo id
-            try {
-                while (true) {
-                    raf.seek(pos);
-                    id = raf.readInt();
-
-
-                    if (raf.getFilePointer() == raf.length()) {
-                        break;
-                    } else {
-                        pos += 48;//valor correcto para cliente
-                    }
-
-
-                }
-            } catch (
-                    IOException e) {
-
-            }
-
-            //recoger nuevos datos
-
-
-            String nombre;
-            do {
-                System.out.println("escribe el nombre del nuevo cliente");
-                nombre = reader.readLine();
-
-            } while (nombre.length() < 2);
-
-            //insertar nuevos datos
-            long ids = fichero.length();
-            fichero.seek(ids);//volverse a posicionar al final
-
-            StringBuffer buff3;
-
-
-            buff3 = new StringBuffer(nombre);
-            buff3.setLength(20);
-
-
-            fichero.writeInt(id + 1);
-            fichero.writeChars(buff3.toString());
-            fichero.writeInt(libros);
-
-
-            fichero.close();
-            raf.close();
-
-            System.out.println("Cliente registrado con exito");
-
-
-        }
-
-    } //funciona
-     private  static void EliCliente (BufferedReader reader) throws IOException {
-         System.out.println("mira el id:");
-         ListaClientes();
-
-         System.out.println("escribe el id del cliente que quieres eliminar");
-         int numero = Integer.parseInt(reader.readLine());
-
-         if (existe(numero)) {
-
-             RandomAccessFile raf = new RandomAccessFile(".//Clientes.dat", "rw");
-
-
-             RandomAccessFile ficheroTemporal = new RandomAccessFile(".//Clientes2.dat", "rw");
-
-             File ficheroBorrar = new File(".//Clientes.dat");
-
-
-             char[] nombres = new char[20];
-             char a;
-             int Libro;
-
-             int pos = 0, id = 0;
-             StringBuilder buff1;
-
-
-             //escrbir en el fichero temporal los valores que se quieren
-             try {
-                 while (true) {
-                     raf.seek(pos);
-                     id = raf.readInt();
-                     for (int i = 0; i < nombres.length; i++) {
-                         a = raf.readChar();
-                         nombres[i] = a;
-
-                     }
-                     Libro = raf.readInt();
-
-
-                     String apellidos2 = new String(nombres);
-
-
-
-                     if (id == numero) {
-                         System.out.println("se lo salta");
-
-
-                     } else {
-                         buff1 = new StringBuilder(apellidos2);
-
-
-
-                         buff1.setLength(20);
-
-
-
-                         ficheroTemporal.seek(pos);
-
-                         ficheroTemporal.writeInt(id);
-                         ficheroTemporal.writeChars(buff1.toString());
-                         ficheroTemporal.writeInt(Libro);
-
-                     }
-
-                     if (raf.getFilePointer() == raf.length()) {
-                         break;
-                     } else {
-                         pos += 48;
-                     }
-
-
-                 }
-             } catch (
-                     IOException e) {
-                 System.out.println("Ya se termino");
-             }
-
-
-
-             ficheroBorrar.delete();//borra el fichero original
-
-             //reescribir el fichero original
-             RandomAccessFile fichero2 = new RandomAccessFile(".//Clientes2.dat", "rw");
-             RandomAccessFile ficheroD = new RandomAccessFile(".//Clientes.dat", "rw");
-
-             pos = 0;
-
-             char[] nombre = new char[20];
-             char aa;
-             int Libro2;
-
-             try {
-                 while (true) {
-                     fichero2.seek(pos);
-                     id = fichero2.readInt();
-                     for (int i = 0; i < nombre.length; i++) {
-                         aa = fichero2.readChar();
-                         nombre[i] = aa;
-
-
-                     }
-                     Libro2 = fichero2.readInt();
-
-
-                     String nombres2 = new String(nombre);
-
-
-                     buff1 = new StringBuilder(nombres2);
-                     buff1.setLength(20);
-
-
-
-                     ficheroD.seek(pos);
-
-                     ficheroD.writeInt(id);
-                     ficheroD.writeChars(buff1.toString());
-                     ficheroD.writeInt(Libro2);
-
-
-                     if (fichero2.getFilePointer() == fichero2.length()) {
-                         break;
-                     } else {
-                         pos += 48;
-                     }
-
-
-                 }
-             } catch (
-                     IOException e) {
-                 System.out.println("Se termino de guardar los valores correctors");
-             }
-
-
-             //se borra el fichero sobrante
-             File limpiar = new File(".//Clientes2.dat");
-             limpiar.delete();
-
-
-         //eliminar clientes funciona, se le pasa el id
-
-
-         } else {
-             System.out.println("no existe");
-         }
-
-     }//eliminar correctamente el cliente
-
-    //FUNCIONES MENU
-    private static void devolver() {
-
-    }//FALTA
-
-    private static void librosPrestados() {
-    }//FALTA
-
-
-    private static boolean existe(int numero) throws FileNotFoundException {
-        RandomAccessFile raf = new RandomAccessFile(".//Clientes.dat", "r");
-
-        int pos = 0, id;
-
-
-        try {
-            while (true) {
-                raf.seek(pos);
-                id = raf.readInt();
-
-
-                if (id == numero) {
-                    return true;
-
-                }
-
-                if (raf.getFilePointer() == raf.length()) {
-                    break;
-                } else {
-                    pos += 48;
-                }
-
-
-            }
-        } catch (
-                IOException e) {
-            System.out.println("Ya se busco el cliente");
-        }
-
-
-        return false;
-    }//existe id cliente
 
     //MENU LISTA NEGRA
     private static void listaNegra(BufferedReader reader) throws IOException {
-        boolean pasar =false;
+        boolean pasar = false;
         int opcion;
-        do{
-        try {
+        do {
+            try {
 
                 System.out.println("¿que quieres hacer?:\n1.-ver lista\n2.-añadir a la lista\n3.-volver al menú");
                 opcion = Integer.parseInt(reader.readLine());
 
-                if(opcion>0 && opcion <= 3){
-                    pasar =true;
-                }else {
+                if (opcion > 0 && opcion <= 3) {
+                    pasar = true;
+                } else {
                     System.out.println("mete un valor valido");
                 }
 
 
+                if (opcion == 1) {
+                    leerLista();
+                    listaNegra(reader);
+                }
+                if (opcion == 2) {
+                    nuevoLN(reader);
+                    listaNegra(reader);
 
-            if (opcion == 1) {
-                leerLista();
-                listaNegra(reader);
+                }
+                if (opcion == 3) {
+                    menu();
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("mete un valor númerico");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (ParserConfigurationException e) {
+                throw new RuntimeException(e);
+            } catch (TransformerException e) {
+                throw new RuntimeException(e);
             }
-            if (opcion == 2) {
-                nuevoLN(reader);
-                listaNegra(reader);
-
-            }
-            if (opcion == 3) {
-                menu();
-            }
-        } catch (NumberFormatException e) {
-            System.out.println("mete un valor númerico");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }}while(!pasar);
+        } while (!pasar);
 
 
     }//fin?
 
     private static void nuevoLN(BufferedReader reader) throws IOException {
         System.out.println("lista de clientes:");
-        ListaClientes();
+        Cliente.ListaClientes();
 
 
         int nombre;
@@ -511,10 +190,9 @@ public class Main {
             System.out.println("escribe el id");
             nombre = Integer.parseInt(reader.readLine());//id
 
-            if (existe(nombre)) {
+            if (Libro.existe(nombre)) {
                 System.out.println("causas:");
                 String causa = reader.readLine();
-
 
 
                 //coger nombre
@@ -540,7 +218,7 @@ public class Main {
                         String nombres2 = new String(nombres);
 
 
-                        if (id ==nombre) {
+                        if (id == nombre) {
 
                             RandomAccessFile fichero = new RandomAccessFile(".//ListaNegra.dat", "rw");
 
@@ -575,7 +253,6 @@ public class Main {
                     }
 
 
-
                 } catch (
                         IOException e) {
 
@@ -584,771 +261,248 @@ public class Main {
                 //eliminar el usuario de la lista original
 
 
-
-
             } else {
                 System.out.println("este cliente no existe");
             }
 
-        } while (!existe(nombre));
+        } while (!Libro.existe(nombre));
 
-        eliminarC(nombre);
+        Cliente.eliminarC(nombre);
 
     }//guarda el nuevo cliente y lo elimina de la lista original
-
 
     private static void leerLista() throws IOException {
         RandomAccessFile raf = new RandomAccessFile(".//ListaNegra.dat", "rw");
         long tamanyo = raf.length();
 
-        if( tamanyo>0){
-        char[] apellidos = new char[20];
-        char a;
-        char b;
-        char[] estado = new char[20];
-        int pos = 0, id;
-
-
-        try {
-            while (true) {
-                raf.seek(pos);
-                id = raf.readInt();
-                for (int i = 0; i < apellidos.length; i++) {
-                    a = raf.readChar();
-                    apellidos[i] = a;
-
-
-                }
-                for (int i = 0; i < estado.length; i++) {
-                    b = raf.readChar();
-                    estado[i] = b;
-                }
-
-                String apellidos2 = new String(apellidos);
-                String estado2 = new String(estado);
-
-
-                if (id != 0) {
-                    System.out.println("ID: " + id + " nombre: " + apellidos2.trim() + " motivo: " + estado2.trim());
-
-                }
-
-                if (raf.getFilePointer() == raf.length()) {
-                    break;
-                } else {
-                    pos += 84;//creo que este esta bien
-                }
-
-
-            }
-        } catch (
-                IOException e) {
-            System.out.println("Ya se han mostrado todos los expulsados");
-        }
-        }else{
-            System.out.println("la lista esta vacia");
-        }
-
-    }//funciona
-
-
-    //MENU NORMAL
-
-    private static void TodosLibros() throws IOException {
-
-        RandomAccessFile raf = new RandomAccessFile(".//Libros.dat", "r");
-
-        char[] apellidos = new char[20];
-        char a;
-        char b;
-        char[] estado = new char[20];
-        int pos = 0, id;
-
-
-        try {
-            while (true) {
-                raf.seek(pos);
-                id = raf.readInt();
-                for (int i = 0; i < apellidos.length; i++) {
-                    a = raf.readChar();
-                    apellidos[i] = a;
-
-
-                }
-                for (int i = 0; i < estado.length; i++) {
-                    b = raf.readChar();
-                    estado[i] = b;
-                }
-
-                String apellidos2 = new String(apellidos);
-                String estado2 = new String(estado);
-
-
-                if (id != 0) {
-                    System.out.println("ID: " + id + " nombre: " + apellidos2.trim() + " estado: " + estado2.trim());
-
-                }
-
-                if (raf.getFilePointer() == raf.length()) {
-                    break;
-                } else {
-                    pos += 84;
-                }
-
-
-            }
-        } catch (
-                IOException e) {
-            System.out.println("Ya se han mostrado todos los libros");
-        }
-
-    }//funciona, muestra la lista de todos los libros
-
-
-    private static void LibrosPresta() throws FileNotFoundException {
-        RandomAccessFile raf = new RandomAccessFile(".//Libros.dat", "r");
-
-        char[] apellidos = new char[20];
-        char a;
-        char b;
-        char[] estado = new char[20];
-        int pos = 0, id;
-
-
-        try {
-            while (true) {
-                raf.seek(pos);
-                id = raf.readInt();
-                for (int i = 0; i < apellidos.length; i++) {
-                    a = raf.readChar();
-                    apellidos[i] = a;
-
-
-                }
-                for (int i = 0; i < estado.length; i++) {
-                    b = raf.readChar();
-                    estado[i] = b;
-                }
-
-                String apellidos2 = new String(apellidos);
-                String estado2 = new String(estado);
-
-                if (!estado2.trim().equals("descontinuado") && !estado2.trim().equals("alquilado")) {
-                    System.out.println("ID: " + id + " nombre: " + apellidos2.trim() + " estado: " + estado2.trim());
-                }
-
-
-                if (raf.getFilePointer() == raf.length()) {
-                    break;
-                } else {
-                    pos += 84;
-                }
-
-
-            }
-        } catch (
-                IOException e) {
-            System.out.println("Ya se han mostrado todos los libros");
-        }
-
-    }//solo mostrara al usuario los libros disponibles para alquilar
-
-    private static void prestar(BufferedReader reader) throws IOException {
-        RandomAccessFile raf = new RandomAccessFile(".//Libros.dat", "r");
-        int idB = 0;
-        boolean seguir = false;
-        String estadoN = "alquilado";
-
-        int poss = 0;
-        int idd = 0;
-
-
-        //coger el ultimo id
-        try {
-            while (true) {
-                raf.seek(poss);
-                idd = raf.readInt();
-
-
-                if (raf.getFilePointer() == raf.length()) {
-                    break;
-                } else {
-                    poss += 84;
-                }
-
-
-            }
-        } catch (
-                IOException e) {
-
-        }
-
-        do {
-            System.out.println("Elige el ID del libro que quieras alquilar");
-            LibrosPresta();
-
-            try {
-                idB = Integer.parseInt(reader.readLine());
-
-                if (idB > 0 && idB <= idd) {
-                    //si el libro esta en estado alquilado no debe permitir que se alquile, de entrada no se ve
-                    System.out.println("entra");
-                    seguir = true;
-                } else {
-                    System.out.println("este ID no sirve");
-                }
-
-            } catch (NumberFormatException e) {
-                System.out.println("mete un valor númerico");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
-
-        } while (!seguir);
-
-        seguir = false;
-
-        //ver que el usuario no tenga ya 3 libros alquilados, y que exista
-        RandomAccessFile raf2 = new RandomAccessFile(".//Clientes.dat", "rw");
-
-        do {
-            System.out.println("escribe el ID de tu usuario para proceder a alquilar el libro");
-            int numero = Integer.parseInt(reader.readLine());
-            if(existe(numero)){
-                //ver que no exceda el limite
-                int pos = 0;
-                int id ;
-                int Mlibros;
-
-                char[] nombre = new char[20];
-                char n;
-
-
-
-
-                try {
-                    while (true) {
-                        raf2.seek(pos);
-                        id = raf2.readInt();
-                        for (int i = 0; i < nombre.length; i++) {
-                            n= raf2.readChar();
-                            nombre[i]=n;
-
-                        }
-                        Mlibros = raf2.readInt();
-
-
-
-
-                        if(id == numero){
-                            if(Mlibros==3){
-                                System.out.println("ya no se puede alquilar más libros");
-                                menu();
-                            }else {
-                                //añadir un numero a libros alquilados
-
-                                 String name = new String(nombre);
-
-                                 StringBuffer names = new StringBuffer(name);
-                                 names.setLength(20);
-                                raf2.seek(pos);
-
-                                raf2.writeInt(id);
-                                raf2.writeChars(names.toString());
-                                raf2.writeInt(Mlibros+1);
-                                seguir = true;
-                                break;//sale  y edita el libro para que ponga alquilado
-                            }
-
-                        }
-
-
-                        if (raf2.getFilePointer() == raf2.length()) {
-                            break;
-                        } else {
-                            pos += 48;
-                        }
-
-
-                    }
-                } catch (
-                        IOException e) {
-
-                }
-
-
-            }else{
-                System.out.println("este usuario no existe");
-            }
-
-        } while (!seguir);
-
-
-        //alquilar el libro
-
-        RandomAccessFile fichero = new RandomAccessFile(".//Libros.dat", "rw");
-
-
-        char[] apellidos = new char[20];
-        char a;
-        int pos = 0, id;
-        //buscar el id especifico
-        try {
-            while (true) {
-                raf.seek(pos);
-                id = raf.readInt();
-                for (int i = 0; i < apellidos.length; i++) {
-                    a = raf.readChar();
-                    apellidos[i] = a;
-
-
-                }
-
-                String apellidos2 = new String(apellidos);
-
-
-                //cuando se encuentra se hace la modificacion
-                if (id == idB) {
-                    fichero.seek(pos);//ojo con el indice del fichero en el que se quiere editar, el de raf seek no aplica
-                    StringBuffer buff2;
-
-                    buff2 = new StringBuffer(estadoN);
-                    buff2.setLength(20);
-
-                    fichero.writeInt(id);
-                    fichero.writeChars(apellidos2);
-                    fichero.writeChars(buff2.toString());
-
-
-                }
-
-
-                if (raf.getFilePointer() == raf.length()) {
-                    break;
-                } else {
-                    pos += 84;
-                }
-
-
-            }
-        } catch (
-                IOException e) {
-            System.out.println("se presto libro");
-        }
-
-
-    }//funciona
-
-    private static void editar(BufferedReader reader) throws IOException {
-        RandomAccessFile raf = new RandomAccessFile(".//Libros.dat", "r");
-        int idB = 0;
-        boolean seguir = false;
-
-        int poss = 0;
-        int idd = 0;
-
-
-        //coger el ultimo id asi se puede saber si el id que elije el usuario esta dentro del rango
-        try {
-            while (true) {
-                raf.seek(poss);
-                idd = raf.readInt();
-
-
-                if (raf.getFilePointer() == raf.length()) {
-                    break;
-                } else {
-                    poss += 84;
-                }
-
-
-            }
-        } catch (
-                IOException e) {
-
-        }
-
-
-        System.out.println("Elige el ID del libro que quieras editar");
-        TodosLibros();
-
-        do {
-            try {
-                idB = Integer.parseInt(reader.readLine());
-                if (idB > 0 && idB <= idd) {
-                    seguir = true;
-
-
-                } else {
-                    System.out.println("este número no sirve");
-
-                }
-
-            } catch (NumberFormatException e) {
-                System.out.println("debes meter un valor númerico");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        } while (!seguir);
-
-        seguir = false;
-
-        String nombre;
-        do {
-            System.out.println("Escribe su nuevo nombre");
-            nombre = reader.readLine();
-            if (nombre.length() < 2) {
-                System.out.println("escribe un nombre de minimo 2 caracteres");
-            } else {
-                seguir = true;
-            }
-        } while (!seguir);
-
-        seguir = false;
-
-
-        String estadoN;
-        do {
-            System.out.println("Escribe su nuevo estado (disponible,alquilado,descontinuado)");
-            estadoN = reader.readLine().toLowerCase();
-
-            if (estadoN.equals("disponible") || estadoN.equals("alquilado") || estadoN.equals("descontinuado")) {
-                seguir = true;
-
-            } else {
-                System.out.println("esto no sirve, intentalo de nuevo");
-            }
-
-        } while (!seguir);
-
-
-        //editar libro seleccionado
-
-
-        RandomAccessFile fichero = new RandomAccessFile(".//Libros.dat", "rw");
-
-
-        char[] nombres = new char[20];
-        char a;
-        int pos = 0, id;
-        //buscar el id especifico
-        try {
-            while (true) {
-                raf.seek(pos);
-                id = raf.readInt();
-                for (int i = 0; i < nombres.length; i++) {
-                    a = raf.readChar();
-                    nombres[i] = a;
-
-
-                }
-
-
-
-                //cuando se encuentra se hace la modificacion
-                if (id == idB) {
-                    fichero.seek(pos);//ojo con el indice del fichero en el que se quiere editar, el de raf seek no aplica
-                    StringBuffer buff2;
-                    StringBuffer buff = new StringBuffer(nombre);
-                    buff.setLength(20);//si no se ponen se juntaran todos los valores
-
-                    buff2 = new StringBuffer(estadoN);
-                    buff2.setLength(20);
-
-                    fichero.writeInt(id);
-                    fichero.writeChars(buff.toString());
-                    fichero.writeChars(buff2.toString());
-
-
-                }
-
-
-                if (raf.getFilePointer() == raf.length()) {
-                    break;
-                } else {
-                    pos += 84;
-                }
-
-
-            }
-        } catch (
-                IOException e) {
-            System.out.println("se edito el libro");
-        }
-    }//funciona, modifica el nombre y estado del libro
-
-    private static void eliminar(BufferedReader reader) throws IOException {
-
-        int idB = 0;
-        String estadoN = "descontinuado";
-
-        System.out.println("Elige el ID del libro que quieras alquilar");
-        TodosLibros();
-
-        try {
-            idB = Integer.parseInt(reader.readLine());
-        } catch (NumberFormatException e) {
-            System.out.println("debe meter un valor númerico");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        RandomAccessFile raf = new RandomAccessFile(".//Libros.dat", "r");
-        RandomAccessFile fichero = new RandomAccessFile(".//Libros.dat", "rw");
-
-
-        char[] apellidos = new char[20];
-        char a;
-        int pos = 0, id;
-        //buscar el id especifico
-        try {
-            while (true) {
-                raf.seek(pos);
-                id = raf.readInt();
-                for (int i = 0; i < apellidos.length; i++) {
-                    a = raf.readChar();
-                    apellidos[i] = a;
-
-
-                }
-
-
-                String apellidos2 = new String(apellidos);
-
-
-                //cuando se encuentra se hace la modificacion
-                if (id == idB) {
-                    fichero.seek(pos);
-                    StringBuffer buff2;
-
-                    buff2 = new StringBuffer(estadoN);
-                    buff2.setLength(20);
-
-                    fichero.writeInt(id);
-                    fichero.writeChars(apellidos2);
-                    fichero.writeChars(buff2.toString());
-
-
-                }
-
-
-                if (raf.getFilePointer() == raf.length()) {
-                    break;
-                } else {
-                    pos += 84;
-                }
-
-
-            }
-        } catch (
-                IOException e) {
-            System.out.println("se dio de baja un libro, ya no se podra alquilar");
-        }
-    }//marca como descontinuado un libro, asi no permite que se pueda prestar, pero permanece en la base de datos
-
-    private static void crear(BufferedReader reader) throws IOException {
-
-        RandomAccessFile fichero = new RandomAccessFile(".//Libros.dat", "rw");
-        RandomAccessFile raf = new RandomAccessFile(".//Libros.dat", "r");
-
-        //posicionarnos al final de los datos
-        int pos = 0;
-        int id = 0;
-
-
-        //coger el ultimo id
-        try {
-            while (true) {
-                raf.seek(pos);
-                id = raf.readInt();
-
-
-                if (raf.getFilePointer() == raf.length()) {
-                    break;
-                } else {
-                    pos += 84;
-                }
-
-
-            }
-        } catch (
-                IOException e) {
-
-        }
-
-        //recoger nuevos datos
-
-        String nombre;
-        do {
-            System.out.println("Escribe el nombre del libro");
-            nombre = reader.readLine();
-
-        } while (nombre.length() < 2);
-
-
-        String disponibilidad = "disponible";
-
-
-        //insertar nuevos datos
-        long ids = fichero.length();
-        fichero.seek(ids);//volverse a posicionar al final
-
-        StringBuffer buff3;
-        StringBuffer buff4;
-
-        buff3 = new StringBuffer(nombre);
-        buff3.setLength(20);
-
-        buff4 = new StringBuffer(disponibilidad);
-        buff4.setLength(20);
-
-        fichero.writeInt(id + 1);
-        fichero.writeChars(buff3.toString());
-        fichero.writeChars(buff4.toString());
-
-
-        fichero.close();
-        raf.close();
-
-        System.out.println("Libro registrado con exito");
-        menu();// vuelve a mostrar el menu
-
-
-    }//funciona, se crea un nuevo registro de libro
-
-    private static void eliminarC(int numero) throws IOException {
-
-
-            RandomAccessFile raf = new RandomAccessFile(".//Clientes.dat", "rw");
-
-
-            RandomAccessFile ficheroTemporal = new RandomAccessFile(".//Clientes2.dat", "rw");
-
-            File ficheroBorrar = new File(".//Clientes.dat");
-
-
-            char[] nombres = new char[20];
+        if (tamanyo > 0) {
+            char[] apellidos = new char[20];
             char a;
-            int Libro;
+            char b;
+            char[] estado = new char[20];
+            int pos = 0, id;
 
-            int pos = 0, id = 0;
-            StringBuilder buff1;
 
-
-            //escrbir en el fichero temporal los valores que se quieren
             try {
                 while (true) {
                     raf.seek(pos);
                     id = raf.readInt();
-                    for (int i = 0; i < nombres.length; i++) {
+                    for (int i = 0; i < apellidos.length; i++) {
                         a = raf.readChar();
-                        nombres[i] = a;
+                        apellidos[i] = a;
+
 
                     }
-                    Libro = raf.readInt();
+                    for (int i = 0; i < estado.length; i++) {
+                        b = raf.readChar();
+                        estado[i] = b;
+                    }
+
+                    String apellidos2 = new String(apellidos);
+                    String estado2 = new String(estado);
 
 
-                    String apellidos2 = new String(nombres);
-
-
-
-                    if (id == numero) {
-                        System.out.println("se lo salta");
-
-
-                    } else {
-                        buff1 = new StringBuilder(apellidos2);
-
-
-
-                        buff1.setLength(20);
-
-
-
-                        ficheroTemporal.seek(pos);
-
-                        ficheroTemporal.writeInt(id);
-                        ficheroTemporal.writeChars(buff1.toString());
-                        ficheroTemporal.writeInt(Libro);
+                    if (id != 0) {
+                        System.out.println("ID: " + id + " nombre: " + apellidos2.trim() + " motivo: " + estado2.trim());
 
                     }
 
                     if (raf.getFilePointer() == raf.length()) {
                         break;
                     } else {
-                        pos += 48;
+                        pos += 84;//creo que este esta bien
                     }
 
 
                 }
             } catch (
                     IOException e) {
-                System.out.println("Ya se termino");
+                System.out.println("Ya se han mostrado todos los expulsados");
             }
+        } else {
+            System.out.println("la lista esta vacia");
+        }
+
+    }//funciona
+
+    //CREAR XML
+    private static void crearXMLcliente() throws FileNotFoundException, ParserConfigurationException, TransformerException {
+        RandomAccessFile fichero = new RandomAccessFile(".//Clientes.dat", "rw");
+
+
+        // DOM
+
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+
+        DocumentBuilder builder = factory.newDocumentBuilder();
+
+        DOMImplementation implementation = builder.getDOMImplementation();
+        Document document = implementation.createDocument(null, "Clientes", null);
+        document.setXmlVersion("1.0");
+
+
+        Element raiz = document.createElement("Cliente"); //nodo empleado
+        document.getDocumentElement().appendChild(raiz); //lo añade a la raíz del documento
+
+
+        //añadir los datos para el xml
+
+        int pos= 0,id;
+        char[] nombres = new char[20];
+        char a;
 
 
 
-            ficheroBorrar.delete();//borra el fichero original
+        try {
+            while(true){
+                fichero.seek(pos);
+                id = fichero.readInt();
+                for (int i = 0; i < nombres.length; i++) {
+                    a = fichero.readChar();
+                    nombres[i] =a;
 
-            //reescribir el fichero original
-            RandomAccessFile fichero2 = new RandomAccessFile(".//Clientes2.dat", "rw");
-            RandomAccessFile ficheroD = new RandomAccessFile(".//Clientes.dat", "rw");
-
-            pos = 0;
-
-            char[] nombre = new char[20];
-            char aa;
-            int Libro2;
-
-            try {
-                while (true) {
-                    fichero2.seek(pos);
-                    id = fichero2.readInt();
-                    for (int i = 0; i < nombre.length; i++) {
-                        aa = fichero2.readChar();
-                        nombre[i] = aa;
+                }
 
 
-                    }
-                    Libro2 = fichero2.readInt();
+                String nombre = new String(nombres);
 
 
-                    String nombres2 = new String(nombre);
+                if (id < 0){
+                    System.out.println("ese número no sirve");
 
+                }else{
 
-                    buff1 = new StringBuilder(nombres2);
-                    buff1.setLength(20);
+                    //se guardan los clientes registrados en la biblioteca
 
-
-
-                    ficheroD.seek(pos);
-
-                    ficheroD.writeInt(id);
-                    ficheroD.writeChars(buff1.toString());
-                    ficheroD.writeInt(Libro2);
-
-
-                    if (fichero2.getFilePointer() == fichero2.length()) {
-                        break;
-                    } else {
-                        pos += 48;
-                    }
+                    CrearElemento("ID", String.valueOf(id), raiz, document);
+                    CrearElemento("Nombre",nombre.trim(), raiz, document);
 
 
                 }
-            } catch (
-                    IOException e) {
-                System.out.println("Se termino de guardar los valores correctors");
+
+                if(fichero.getFilePointer()== fichero.length()){
+                    break;
+                }else{
+                    pos += 48;
+                }
+
+
             }
+        } catch (IOException e) {}
 
 
-            //se borra el fichero sobrante
-            File limpiar = new File(".//Clientes2.dat");
-            limpiar.delete();
+
+        //creacion fichero XML
+
+        Source source = new DOMSource(document);
+        // Se crea el resultado en el fichero Clientes.xml
+        Result result = new StreamResult(new java.io.File("Clientes.xml"));
+
+        Transformer transformer = TransformerFactory.newInstance().newTransformer();
+
+        transformer.transform(source, result);
+
+        Result console= new StreamResult(System.out);
+        transformer.transform(source, console);
+    }
+
+    private static void crearXMLlibro() throws ParserConfigurationException, FileNotFoundException, TransformerException {
+        RandomAccessFile fichero = new RandomAccessFile(".//Libros.dat", "rw");
 
 
-        }//eliminar clientes funciona, se le pasa el id
+        // DOM
+
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+
+        DocumentBuilder builder = factory.newDocumentBuilder();
+
+        DOMImplementation implementation = builder.getDOMImplementation();
+        Document document = implementation.createDocument(null, "Libros", null);
+        document.setXmlVersion("1.0");
 
 
-    } //actualizar para clientes
+        //Crea y añade el nodo empleado al documento
+        Element raiz = document.createElement("Libro"); //nodo empleado
+        document.getDocumentElement().appendChild(raiz); //lo añade a la raíz del documento
+
+
+        //añadir los datos para el xml
+
+        int pos= 0,id;
+        char[] apellidos = new char[20];
+        char a;
+
+        char[] estados= new char[20];
+        char est;
+
+
+        try {
+            while(true){
+                fichero.seek(pos);
+                id = fichero.readInt();
+                for (int i = 0; i < apellidos.length; i++) {
+                    a = fichero.readChar();
+                    apellidos[i] =a;
+
+                }
+                for (int i = 0; i < estados.length; i++) {
+                    est = fichero.readChar();
+                    estados[i] = est;
+
+                }
+
+                String apellidos2 = new String(apellidos);
+                String estado= new String ( estados);
+
+                if (id < 0){
+                    System.out.println("ese número no sirve");
+
+                }else{
+
+                   //se guardan los libros que la biblioteca virtual tiene
+
+                    CrearElemento("ID", String.valueOf(id), raiz, document);
+                    CrearElemento("Nombre",apellidos2.trim(), raiz, document);
+
+
+                }
+
+                if(fichero.getFilePointer()== fichero.length()){
+                    break;
+                }else{
+                    pos += 84;
+                }
+
+
+            }
+        } catch (
+                IOException e) {
+            System.out.println("fin");
+        }
+
+
+
+        //creacion fichero XML
+
+        //Se crea la fuente XML a partir del documento
+        Source source = new DOMSource(document);
+        // Se crea el resultado en el fichero Empleados.xml
+        Result result = new StreamResult(new java.io.File("Libros.xml"));
+        // Se obtiene un TransformerFactory
+        Transformer transformer = TransformerFactory.newInstance().newTransformer();
+        // Se realiza la transformación de documento a fichero
+        transformer.transform(source, result);
+        // Para mostrar el documento por pantalla podemos especificar como resultado el canal  system.out
+        Result console= new StreamResult(System.out);
+        transformer.transform(source, console);
+    }//Crea XML de los libros
+
+    static void CrearElemento(String datos, String valor, Element raiz, Document document) {
+        Element elem = document.createElement(datos); //creamos hijo
+        Text text = document.createTextNode(valor); //damos valor
+        raiz.appendChild(elem); //pegamos el elemento hijo a la raiz
+        elem.appendChild(text); //pegamos el valor
+    }
+
+
+}
