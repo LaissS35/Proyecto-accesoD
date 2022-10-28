@@ -281,12 +281,10 @@ public class Cliente {
             }
 
 
-            //se borra el fichero sobrante
+            //se borra el fichero temporal
             File limpiar = new File(".//Clientes2.dat");
             limpiar.delete();
 
-
-            //eliminar clientes funciona, se le pasa el id
 
 
         } else {

@@ -19,44 +19,8 @@ public class Main {
         menu();
     }
 
-    private static void llenar() throws IOException {
-        RandomAccessFile fichero = new RandomAccessFile(".//Libros.dat", "rw");
-        RandomAccessFile raf = new RandomAccessFile(".//Libros.dat", "r");
 
-
-        long tamanyo = raf.length();
-        //si no hay datos se crean automaticamente
-        if (tamanyo == 0) {
-
-            String libros;
-            String estado = "disponible";
-
-
-            StringBuilder buff;
-            StringBuilder buff2;
-
-
-            for (int j = 0; j < 5; j++) {
-                libros = "Libros " + j;
-                buff = new StringBuilder(libros);
-                buff2 = new StringBuilder(estado);
-
-
-                buff.setLength(20);
-                buff2.setLength(20);
-
-
-                fichero.writeInt(j + 1);//id automatico
-                fichero.writeChars(buff.toString());//nombre
-                fichero.writeChars(buff2.toString());//estado
-
-
-            }
-
-        }
-
-    }//si no hay datos se generan 5 libros
-
+    //------FUNCIONES------
     public static void menu() throws IOException, ParserConfigurationException, TransformerException {
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
@@ -65,8 +29,8 @@ public class Main {
         int opcion = 0;
 
         do {
-            System.out.println("Bienvenido a la biblioteca ¿que vas a hacer hoy?\n 1.-registrar nuevo libro\n2.-dar de baja un libro\n3.-modificar libro\n4.-tomar prestado libro\n5.-Lista de todos los libros" +
-                    "\n6.-lista de betados\n7.-lista libros prestados\n8.-devolver libro\n9.-Lista Clientes\n10.-añadir cliente\n11.-Eliminar cliente\n12.-Crear XML\n13.-Saliste!");
+            System.out.println("Bienvenido a la biblioteca ¿que vas a hacer hoy?\n1.-registrar nuevo libro\n2.-dar de baja un libro\n3.-modificar libro\n4.-tomar prestado libro\n5.-Lista de todos los libros" +
+                    "\n6.-lista de expulsados\n7.-lista libros prestados\n8.-devolver libro\n9.-Lista Clientes\n10.-añadir cliente\n11.-Eliminar cliente\n12.-Crear XML\n13.-Saliste!");
             try {
                 opcion = Integer.parseInt(reader.readLine());
             } catch (NumberFormatException e) {
@@ -83,7 +47,7 @@ public class Main {
         } while (!avance);
         if (opcion == 1) {
             Libro.crear(reader);
-            menu();
+
         }
         if (opcion == 2) {
            Libro. eliminar(reader);
@@ -126,16 +90,16 @@ public class Main {
             menu();
         }
         if (opcion == 12) {
-            System.out.println("Saliste ;)");
-        }
-        if(opcion ==13){
             crearXMLlibro();
             crearXMLcliente();
             menu();
 
         }
-    }//menu principal del usuario
+        if(opcion ==13){
+            System.out.println("Saliste ;)");
 
+        }
+    }//menu principal del usuario
 
     //MENU LISTA NEGRA
     private static void listaNegra(BufferedReader reader) throws IOException {
@@ -253,10 +217,7 @@ public class Main {
                     }
 
 
-                } catch (
-                        IOException e) {
-
-                }
+                } catch (IOException e) {}
 
                 //eliminar el usuario de la lista original
 
@@ -325,7 +286,7 @@ public class Main {
 
     }//funciona
 
-    //CREAR XML
+    //CREAR XML [CLIENTE / LIBRO]
     private static void crearXMLcliente() throws FileNotFoundException, ParserConfigurationException, TransformerException {
         RandomAccessFile fichero = new RandomAccessFile(".//Clientes.dat", "rw");
 
@@ -407,35 +368,24 @@ public class Main {
     }
 
     private static void crearXMLlibro() throws ParserConfigurationException, FileNotFoundException, TransformerException {
+        //DOM
         RandomAccessFile fichero = new RandomAccessFile(".//Libros.dat", "rw");
-
-
-        // DOM
-
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-
         DocumentBuilder builder = factory.newDocumentBuilder();
 
         DOMImplementation implementation = builder.getDOMImplementation();
         Document document = implementation.createDocument(null, "Libros", null);
         document.setXmlVersion("1.0");
 
-
         //Crea y añade el nodo empleado al documento
         Element raiz = document.createElement("Libro"); //nodo empleado
         document.getDocumentElement().appendChild(raiz); //lo añade a la raíz del documento
-
-
-        //añadir los datos para el xml
-
+   
         int pos= 0,id;
         char[] apellidos = new char[20];
         char a;
 
-        char[] estados= new char[20];
-        char est;
-
-
+        //Coger datps de los ficheros
         try {
             while(true){
                 fichero.seek(pos);
@@ -445,42 +395,20 @@ public class Main {
                     apellidos[i] =a;
 
                 }
-                for (int i = 0; i < estados.length; i++) {
-                    est = fichero.readChar();
-                    estados[i] = est;
-
-                }
-
                 String apellidos2 = new String(apellidos);
-                String estado= new String ( estados);
-
                 if (id < 0){
-                    System.out.println("ese número no sirve");
-
-                }else{
-
+                    System.out.println("ese número no sirve");}else{
                    //se guardan los libros que la biblioteca virtual tiene
-
                     CrearElemento("ID", String.valueOf(id), raiz, document);
-                    CrearElemento("Nombre",apellidos2.trim(), raiz, document);
-
-
-                }
-
+                    CrearElemento("Nombre",apellidos2.trim(), raiz, document);}
                 if(fichero.getFilePointer()== fichero.length()){
                     break;
                 }else{
                     pos += 84;
                 }
 
-
             }
-        } catch (
-                IOException e) {
-            System.out.println("fin");
-        }
-
-
+        } catch (IOException e) {}
 
         //creacion fichero XML
 
@@ -503,6 +431,45 @@ public class Main {
         raiz.appendChild(elem); //pegamos el elemento hijo a la raiz
         elem.appendChild(text); //pegamos el valor
     }
+
+    //LLENAR BIBLIOTECA CON 5 LIBROS
+    private static void llenar() throws IOException {
+        RandomAccessFile fichero = new RandomAccessFile(".//Libros.dat", "rw");
+        RandomAccessFile raf = new RandomAccessFile(".//Libros.dat", "r");
+
+
+        long tamanyo = raf.length();
+        //si no hay datos se crean automaticamente
+        if (tamanyo == 0) {
+
+            String libros;
+            String estado = "disponible";
+
+
+            StringBuilder buff;
+            StringBuilder buff2;
+
+
+            for (int j = 0; j < 5; j++) {
+                libros = "Libros " + j;
+                buff = new StringBuilder(libros);
+                buff2 = new StringBuilder(estado);
+
+
+                buff.setLength(20);
+                buff2.setLength(20);
+
+
+                fichero.writeInt(j + 1);//id automatico
+                fichero.writeChars(buff.toString());//nombre
+                fichero.writeChars(buff2.toString());//estado
+
+
+            }
+
+        }
+
+    }//si no hay datos se generan 5 libros
 
 
 }

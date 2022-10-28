@@ -295,11 +295,10 @@ public class Libro {
     public static void editar(BufferedReader reader) throws IOException {
         RandomAccessFile raf = new RandomAccessFile(".//Libros.dat", "r");
         int idB = 0;
-        boolean seguir = false;
+        boolean seguir = false;//sirve para controlar el bucle
 
         int poss = 0;
         int idd = 0;
-
 
         //coger el ultimo id asi se puede saber si el id que elije el usuario esta dentro del rango
         try {
@@ -321,7 +320,6 @@ public class Libro {
 
         }
 
-
         System.out.println("Elige el ID del libro que quieras editar");
         Libro.TodosLibros();
 
@@ -329,7 +327,7 @@ public class Libro {
             try {
                 idB = Integer.parseInt(reader.readLine());
                 if (idB > 0 && idB <= idd) {
-                    seguir = true;
+                    seguir = true;//si el id esta en un rango valido se seguira adelante
 
 
                 } else {
@@ -353,12 +351,11 @@ public class Libro {
             if (nombre.length() < 2) {
                 System.out.println("escribe un nombre de minimo 2 caracteres");
             } else {
-                seguir = true;
+                seguir = true;//si el nombre cumple los requisitos de caracter seguira adelante
             }
         } while (!seguir);
 
         seguir = false;
-
 
         String estadoN;
         do {
@@ -366,7 +363,7 @@ public class Libro {
             estadoN = reader.readLine().toLowerCase();
 
             if (estadoN.equals("disponible") || estadoN.equals("alquilado") || estadoN.equals("descontinuado")) {
-                seguir = true;
+                seguir = true;//si el estado escrito es valido seguira adelante
 
             } else {
                 System.out.println("esto no sirve, intentalo de nuevo");
@@ -376,10 +373,7 @@ public class Libro {
 
 
         //editar libro seleccionado
-
-
         RandomAccessFile fichero = new RandomAccessFile(".//Libros.dat", "rw");
-
 
         char[] nombres = new char[20];
         char a;
@@ -396,7 +390,6 @@ public class Libro {
 
                 }
 
-
                 //cuando se encuentra se hace la modificacion
                 if (id == idB) {
                     fichero.seek(pos);//ojo con el indice del fichero en el que se quiere editar, el de raf seek no aplica
@@ -410,10 +403,7 @@ public class Libro {
                     fichero.writeInt(id);
                     fichero.writeChars(buff.toString());
                     fichero.writeChars(buff2.toString());
-
-
                 }
-
 
                 if (raf.getFilePointer() == raf.length()) {
                     break;
@@ -542,10 +532,8 @@ public class Libro {
         RandomAccessFile fichero = new RandomAccessFile(".//Libros.dat", "rw");
         RandomAccessFile raf = new RandomAccessFile(".//Libros.dat", "r");
 
-        //posicionarnos al final de los datos
         int pos = 0;
         int id = 0;
-
 
         //coger el ultimo id
         try {
@@ -560,12 +548,8 @@ public class Libro {
                     pos += 84;
                 }
 
-
             }
-        } catch (
-                IOException e) {
-
-        }
+        } catch (IOException e) {}
 
         //recoger nuevos datos
 
@@ -576,9 +560,7 @@ public class Libro {
 
         } while (nombre.length() < 2);
 
-
         String disponibilidad = "disponible";
-
 
         //insertar nuevos datos
         long ids = fichero.length();
