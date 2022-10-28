@@ -45,65 +45,60 @@ public class Main {
                 System.out.println("Mete un valor valido");
             }
         } while (!avance);
-        if (opcion == 1) {
-            Libro.crear(reader);
 
+        switch (opcion) {
+            case 1 -> Libro.crear(reader);
+            case 2 -> {
+                Libro.eliminar(reader);
+                menu();
+            }
+            case 3 -> {
+                Libro.editar(reader);
+                menu();
+            }
+            case 4 -> {
+                Libro.prestar(reader);
+                menu();
+            }
+            case 5 -> {
+                Libro.TodosLibros();
+                menu();
+            }
+            case 6 -> listaNegra(reader);
+            case 7 -> {
+                Libro.librosPrestados();
+                menu();
+            }
+            case 8 -> {
+                Libro.devolver(reader);
+                menu();
+            }
+            case 9 -> {
+                Cliente.ListaClientes();
+                menu();
+            }
+            case 10 -> {
+                Cliente.Acliente(reader);
+                menu();
+            }
+            case 11 -> {
+                Cliente.EliCliente(reader);
+                menu();
+            }
+            case 12 -> {
+                crearXMLlibro();
+                crearXMLcliente();
+                menu();
+            }
+            case 13 -> System.out.println("Saliste ;)");
+            default -> System.out.println("esa opción no existe...?");
         }
-        if (opcion == 2) {
-           Libro. eliminar(reader);
-            menu();
-        }
-        if (opcion == 3) {
-           Libro. editar(reader);
-            menu();
-        }
-        if (opcion == 4) {
-          Libro.  prestar(reader);
-            menu();
-        }
-        if (opcion == 5) {
-            Libro.TodosLibros();
-            menu();
-        }
-        if (opcion == 6) {
-            listaNegra(reader);
 
-        }
-        if (opcion == 7) {
-            Libro.librosPrestados();
-            menu();
-        }
-        if (opcion == 8) {
-           Libro. devolver(reader);
-            menu();
-        }
-        if (opcion == 9) {
-           Cliente. ListaClientes();
-            menu();
-        }
-        if (opcion == 10) {
-           Cliente. Acliente(reader);
-            menu();
-        }
-        if (opcion == 11) {
-            Cliente.EliCliente(reader);
-            menu();
-        }
-        if (opcion == 12) {
-            crearXMLlibro();
-            crearXMLcliente();
-            menu();
-
-        }
-        if(opcion ==13){
-            System.out.println("Saliste ;)");
-
-        }
     }//menu principal del usuario
 
     //MENU LISTA NEGRA
     private static void listaNegra(BufferedReader reader) throws IOException {
-        boolean pasar = false;
+        boolean pasar = false;//CUANDO SEA TRUE DEJARA DE PEDIR UN VALOR CORRECTO AL USUARIO
         int opcion;
         do {
             try {
@@ -112,24 +107,24 @@ public class Main {
                 opcion = Integer.parseInt(reader.readLine());
 
                 if (opcion > 0 && opcion <= 3) {
-                    pasar = true;
+                    pasar = true; //SE VERIFICA QUE SIRVE
                 } else {
                     System.out.println("mete un valor valido");
                 }
 
+                switch (opcion) {
+                    case 1 -> {
+                        leerLista();
+                        listaNegra(reader);
+                    }
+                    case 2 -> {
+                        nuevoLN(reader);
+                        listaNegra(reader);
+                    }
+                    case 3 -> menu();
+                    default -> System.out.println("esta opcion no existe...?");
+                }
 
-                if (opcion == 1) {
-                    leerLista();
-                    listaNegra(reader);
-                }
-                if (opcion == 2) {
-                    nuevoLN(reader);
-                    listaNegra(reader);
-
-                }
-                if (opcion == 3) {
-                    menu();
-                }
             } catch (NumberFormatException e) {
                 System.out.println("mete un valor númerico");
             } catch (IOException e) {
@@ -142,7 +137,7 @@ public class Main {
         } while (!pasar);
 
 
-    }//fin?
+    }//MENU LISTA NEGRA
 
     private static void nuevoLN(BufferedReader reader) throws IOException {
         System.out.println("lista de clientes:");
@@ -154,7 +149,7 @@ public class Main {
             System.out.println("escribe el id");
             nombre = Integer.parseInt(reader.readLine());//id
 
-            if (Libro.existe(nombre)) {
+            if (Cliente.existe(nombre)) {
                 System.out.println("causas:");
                 String causa = reader.readLine();
 
@@ -164,7 +159,6 @@ public class Main {
 
                 char[] nombres = new char[20];
                 char a;
-                int LibrosM;
                 int pos = 0, id;
 
 
@@ -217,7 +211,8 @@ public class Main {
                     }
 
 
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                }
 
                 //eliminar el usuario de la lista original
 
@@ -226,11 +221,11 @@ public class Main {
                 System.out.println("este cliente no existe");
             }
 
-        } while (!Libro.existe(nombre));
+        } while (!Cliente.existe(nombre));
 
         Cliente.eliminarC(nombre);
 
-    }//guarda el nuevo cliente y lo elimina de la lista original
+    }//GUARDA CLIENTE EXPULSADO Y LO ELIMINA DEL FICHERO ORIGINAL
 
     private static void leerLista() throws IOException {
         RandomAccessFile raf = new RandomAccessFile(".//ListaNegra.dat", "rw");
@@ -262,16 +257,13 @@ public class Main {
                     String apellidos2 = new String(apellidos);
                     String estado2 = new String(estado);
 
+                    System.out.println("ID: " + id + " nombre: " + apellidos2.trim() + " motivo: " + estado2.trim());
 
-                    if (id != 0) {
-                        System.out.println("ID: " + id + " nombre: " + apellidos2.trim() + " motivo: " + estado2.trim());
-
-                    }
 
                     if (raf.getFilePointer() == raf.length()) {
                         break;
                     } else {
-                        pos += 84;//creo que este esta bien
+                        pos += 84;
                     }
 
 
@@ -284,13 +276,11 @@ public class Main {
             System.out.println("la lista esta vacia");
         }
 
-    }//funciona
+    }//MOSTRAR TODOS LOS EXPULSADOS
 
     //CREAR XML [CLIENTE / LIBRO]
     private static void crearXMLcliente() throws FileNotFoundException, ParserConfigurationException, TransformerException {
         RandomAccessFile fichero = new RandomAccessFile(".//Clientes.dat", "rw");
-
-
         // DOM
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -308,49 +298,38 @@ public class Main {
 
         //añadir los datos para el xml
 
-        int pos= 0,id;
+        int pos = 0, id;
         char[] nombres = new char[20];
         char a;
 
-
-
         try {
-            while(true){
+            while (true) {
                 fichero.seek(pos);
                 id = fichero.readInt();
                 for (int i = 0; i < nombres.length; i++) {
                     a = fichero.readChar();
-                    nombres[i] =a;
+                    nombres[i] = a;
 
                 }
-
-
                 String nombre = new String(nombres);
 
 
-                if (id < 0){
-                    System.out.println("ese número no sirve");
+                //se guardan los clientes registrados en la biblioteca
 
-                }else{
-
-                    //se guardan los clientes registrados en la biblioteca
-
-                    CrearElemento("ID", String.valueOf(id), raiz, document);
-                    CrearElemento("Nombre",nombre.trim(), raiz, document);
+                CrearElemento("ID", String.valueOf(id), raiz, document);
+                CrearElemento("Nombre", nombre.trim(), raiz, document);
 
 
-                }
-
-                if(fichero.getFilePointer()== fichero.length()){
+                if (fichero.getFilePointer() == fichero.length()) {
                     break;
-                }else{
+                } else {
                     pos += 48;
                 }
 
 
             }
-        } catch (IOException e) {}
-
+        } catch (IOException e) {
+        }
 
 
         //creacion fichero XML
@@ -363,7 +342,7 @@ public class Main {
 
         transformer.transform(source, result);
 
-        Result console= new StreamResult(System.out);
+        Result console = new StreamResult(System.out);
         transformer.transform(source, console);
     }
 
@@ -380,35 +359,36 @@ public class Main {
         //Crea y añade el nodo empleado al documento
         Element raiz = document.createElement("Libro"); //nodo empleado
         document.getDocumentElement().appendChild(raiz); //lo añade a la raíz del documento
-   
-        int pos= 0,id;
+
+        int pos = 0, id;
         char[] apellidos = new char[20];
         char a;
 
         //Coger datps de los ficheros
         try {
-            while(true){
+            while (true) {
                 fichero.seek(pos);
                 id = fichero.readInt();
                 for (int i = 0; i < apellidos.length; i++) {
                     a = fichero.readChar();
-                    apellidos[i] =a;
+                    apellidos[i] = a;
 
                 }
                 String apellidos2 = new String(apellidos);
-                if (id < 0){
-                    System.out.println("ese número no sirve");}else{
-                   //se guardan los libros que la biblioteca virtual tiene
-                    CrearElemento("ID", String.valueOf(id), raiz, document);
-                    CrearElemento("Nombre",apellidos2.trim(), raiz, document);}
-                if(fichero.getFilePointer()== fichero.length()){
+
+                //se guardan los libros que la biblioteca virtual tiene
+                CrearElemento("ID", String.valueOf(id), raiz, document);
+                CrearElemento("Nombre", apellidos2.trim(), raiz, document);
+
+                if (fichero.getFilePointer() == fichero.length()) {
                     break;
-                }else{
+                } else {
                     pos += 84;
                 }
 
             }
-        } catch (IOException e) {}
+        } catch (IOException e) {
+        }
 
         //creacion fichero XML
 
@@ -421,9 +401,9 @@ public class Main {
         // Se realiza la transformación de documento a fichero
         transformer.transform(source, result);
         // Para mostrar el documento por pantalla podemos especificar como resultado el canal  system.out
-        Result console= new StreamResult(System.out);
+        Result console = new StreamResult(System.out);
         transformer.transform(source, console);
-    }//Crea XML de los libros
+    }
 
     static void CrearElemento(String datos, String valor, Element raiz, Document document) {
         Element elem = document.createElement(datos); //creamos hijo

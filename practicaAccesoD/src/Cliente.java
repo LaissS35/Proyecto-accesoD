@@ -1,5 +1,4 @@
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
+
 import java.io.*;
 
 public class Cliente {
@@ -33,7 +32,7 @@ public class Cliente {
                     String nombres2 = new String(nombres);
 
 
-                    if (id != 0) {
+                    if (id != 0) {//AL ELIMINAR UN CLIENTE QUEDA UN ID 0 SIN DATOS, SE SALTARAN EN CASO DE SER PRESENTES
                         System.out.println("ID: " + id + " nombre: " + nombres2.trim() + " Nº libros prestados: " + LibrosM);
 
                     }
@@ -52,20 +51,23 @@ public class Cliente {
             }
         }
 
-    } //funciona
+    } //VER TODOS LOS CLIENTES
 
     public static void Acliente(BufferedReader reader) throws IOException {
-        int libros = 0;
+        int libros = 0;//NUMERO DE LIBROS ALQUILADOS SIEMPRE SERA 0 AL REGISTRAR UN NUEVO CLIENTE
 
-
-        //añadir datos
         RandomAccessFile fichero = new RandomAccessFile(".//Clientes.dat", "rw");
-        RandomAccessFile raf = new RandomAccessFile(".//Clientes.dat", "r");
+        RandomAccessFile raf = null;
+        try {
+            raf = new RandomAccessFile(".//Clientes.dat", "r");
+        } catch (FileNotFoundException e) {
+            System.out.println("error con el fichero");
+        }
 
         long tamanyo = raf.length();
 
 
-        if (tamanyo == 0) {
+        if (tamanyo == 0) {//EN CASO NO NO HABER CLIENTES REGISTRADOS NO COGEMOS NINGUN ID FINAL
             String nombre;
             do {
                 System.out.println("escribe el nombre del nuevo cliente");
@@ -95,7 +97,7 @@ public class Cliente {
             System.out.println("Cliente registrado con exito");
 
         } else {
-            //posicionarnos al final de los datos
+
             int pos = 0;
             int id = 0;
             //coger el ultimo id
@@ -113,10 +115,7 @@ public class Cliente {
 
 
                 }
-            } catch (
-                    IOException e) {
-
-            }
+            } catch (IOException e) {}
 
             //recoger nuevos datos
 
@@ -152,7 +151,7 @@ public class Cliente {
 
         }
 
-    } //funciona
+    } //AÑADIR CLIENTE
 
     public static void EliCliente(BufferedReader reader) throws IOException {
         System.out.println("mira el id:");
@@ -161,11 +160,10 @@ public class Cliente {
         System.out.println("escribe el id del cliente que quieres eliminar");
         int numero = Integer.parseInt(reader.readLine());
 
-        if (Libro.existe(numero)) {
+        if (existe(numero)) {
 
+            //AQUI ESTAN 2 FICHEROS, EL ORGINAL Y EL TEMPORAL 'CLIENTES2'.
             RandomAccessFile raf = new RandomAccessFile(".//Clientes.dat", "rw");
-
-
             RandomAccessFile ficheroTemporal = new RandomAccessFile(".//Clientes2.dat", "rw");
 
             File ficheroBorrar = new File(".//Clientes.dat");
@@ -179,7 +177,7 @@ public class Cliente {
             StringBuilder buff1;
 
 
-            //escrbir en el fichero temporal los valores que se quieren
+            //escrIbir en el fichero temporal los valores que se quieren
             try {
                 while (true) {
                     raf.seek(pos);
@@ -195,11 +193,7 @@ public class Cliente {
                     String apellidos2 = new String(nombres);
 
 
-                    if (id == numero) {
-                        System.out.println("se lo salta");
-
-
-                    } else {
+                    if (id != numero) {//SE ESCRIBIRAN TODOS LOS CLIENTES QUE NO TENGAN EL ID QUE QUEREMOS ELIMINAR EN EL FICHERO TEMPORAL
                         buff1 = new StringBuilder(apellidos2);
 
 
@@ -224,7 +218,7 @@ public class Cliente {
                 }
             } catch (
                     IOException e) {
-                System.out.println("Ya se termino");
+                System.out.println("Ya se termino de escribir en el fichero temporal");
             }
 
 
@@ -277,7 +271,7 @@ public class Cliente {
                 }
             } catch (
                     IOException e) {
-                System.out.println("Se termino de guardar los valores correctors");
+                System.out.println("Se termino de guardar los valores correctos");
             }
 
 
@@ -288,17 +282,17 @@ public class Cliente {
 
 
         } else {
+            //SI EL ID SELECCIONADO NO EXISTE SE TERMINARA
             System.out.println("no existe");
         }
 
-    }//eliminar correctamente el cliente
+    }//ELIMINAR CLIENTE
 
     public static void eliminarC(int numero) throws IOException {
 
+        //LLAMADO POR LA LISTA NEGRA PARA ELIMINAR EL CLIENTE QUE SE QUIERA METER EN ELLA
 
         RandomAccessFile raf = new RandomAccessFile(".//Clientes.dat", "rw");
-
-
         RandomAccessFile ficheroTemporal = new RandomAccessFile(".//Clientes2.dat", "rw");
 
         File ficheroBorrar = new File(".//Clientes.dat");
@@ -328,11 +322,7 @@ public class Cliente {
                 String apellidos2 = new String(nombres);
 
 
-                if (id == numero) {
-                    System.out.println("se lo salta");
-
-
-                } else {
+                if (id != numero) {
                     buff1 = new StringBuilder(apellidos2);
 
 
@@ -344,6 +334,7 @@ public class Cliente {
                     ficheroTemporal.writeInt(id);
                     ficheroTemporal.writeChars(buff1.toString());
                     ficheroTemporal.writeInt(Libro);
+
 
                 }
 
@@ -419,5 +410,45 @@ public class Cliente {
         limpiar.delete();
 
 
-    }//eliminar clientes funciona, se le pasa el id
+    }//SE USA EN LA LISTA NEGRA
+
+    static boolean existe(int numero) throws FileNotFoundException {
+        RandomAccessFile raf = null;
+        try {
+            raf = new RandomAccessFile(".//Clientes.dat", "r");
+        } catch (FileNotFoundException e) {
+            System.out.println("error con el fichero");
+        }
+
+        int pos = 0, id;
+
+
+        try {
+            while (true) {
+                raf.seek(pos);
+                id = raf.readInt();
+
+
+                if (id == numero) {
+                    return true;
+
+                }
+
+                if (raf.getFilePointer() == raf.length()) {
+                    break;
+                } else {
+                    pos += 48;
+                }
+
+
+            }
+        } catch (
+                IOException e) {
+            System.out.println("Ya se busco el cliente");
+        }
+
+
+        return false;
+    }//existe id cliente
+
 }

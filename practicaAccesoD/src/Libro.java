@@ -6,17 +6,21 @@ public class Libro {
 
 
 
-    //funciones Libro
+    //FUNCIONES LIBRO
     public static void TodosLibros() throws IOException {
 
-        RandomAccessFile raf = new RandomAccessFile(".//Libros.dat", "r");
+        RandomAccessFile raf = null;
+        try {
+            raf = new RandomAccessFile(".//Libros.dat", "r");
+        } catch (FileNotFoundException e) {
+            System.out.println("error con el fichero");
+        }
 
         char[] apellidos = new char[20];
         char a;
         char b;
         char[] estado = new char[20];
         int pos = 0, id;
-
 
         try {
             while (true) {
@@ -55,9 +59,14 @@ public class Libro {
             System.out.println("Ya se han mostrado todos los libros");
         }
 
-    }//funciona, muestra la lista de todos los libros
+    }//MUESTRA TODOS LOS LIBROS, NO IMPORTA SU ESTADO
     public static void LibrosPresta() throws FileNotFoundException {
-        RandomAccessFile raf = new RandomAccessFile(".//Libros.dat", "r");
+        RandomAccessFile raf = null;
+        try {
+            raf = new RandomAccessFile(".//Libros.dat", "r");
+        } catch (FileNotFoundException e) {
+            System.out.println("error con el fichero");
+        }
 
         char[] apellidos = new char[20];
         char a;
@@ -84,7 +93,7 @@ public class Libro {
                 String apellidos2 = new String(apellidos);
                 String estado2 = new String(estado);
 
-                if (!estado2.trim().equals("descontinuado") && !estado2.trim().equals("alquilado")) {
+                if (!estado2.trim().equals("discontinuado") && !estado2.trim().equals("alquilado")) {
                     System.out.println("ID: " + id + " nombre: " + apellidos2.trim() + " estado: " + estado2.trim());
                 }
 
@@ -102,11 +111,15 @@ public class Libro {
             System.out.println("Ya se han mostrado todos los libros");
         }
 
-    }//solo mostrara al usuario los libros disponibles para alquilar
-
+    }//MUESTRA LOS LIBROS EN ESTADO DISPONIBLE
 
     public static void prestar(BufferedReader reader) throws IOException {
-        RandomAccessFile raf = new RandomAccessFile(".//Libros.dat", "r");
+        RandomAccessFile raf = null;
+        try {
+            raf = new RandomAccessFile(".//Libros.dat", "r");
+        } catch (FileNotFoundException e) {
+            System.out.println("error con el fichero");
+        }
         int idB = 0;
         boolean seguir = false;
         String estadoN = "alquilado";
@@ -167,7 +180,7 @@ public class Libro {
         do {
             System.out.println("escribe el ID de tu usuario para proceder a alquilar el libro");
             int numero = Integer.parseInt(reader.readLine());
-            if (existe(numero)) {
+            if (Cliente.existe(numero)) {
                 //ver que no exceda el limite
                 int pos = 0;
                 int id;
@@ -220,8 +233,8 @@ public class Libro {
 
 
                     }
-                } catch (
-                        IOException e) {
+                } catch (IOException e) {
+
 
                 } catch (ParserConfigurationException e) {
                     throw new RuntimeException(e);
@@ -290,10 +303,15 @@ public class Libro {
         }
 
 
-    }//funciona
+    }//CAMBIA LOS LIBROS DE ESTADO Y SUMA UN VALOR AL ALQUILER DEL CLIENTE
 
     public static void editar(BufferedReader reader) throws IOException {
-        RandomAccessFile raf = new RandomAccessFile(".//Libros.dat", "r");
+        RandomAccessFile raf = null;
+        try {
+            raf = new RandomAccessFile(".//Libros.dat", "r");
+        } catch (FileNotFoundException e) {
+            System.out.println("error con el fichero");
+        }
         int idB = 0;
         boolean seguir = false;//sirve para controlar el bucle
 
@@ -362,7 +380,7 @@ public class Libro {
             System.out.println("Escribe su nuevo estado (disponible,alquilado,descontinuado)");
             estadoN = reader.readLine().toLowerCase();
 
-            if (estadoN.equals("disponible") || estadoN.equals("alquilado") || estadoN.equals("descontinuado")) {
+            if (estadoN.equals("disponible") || estadoN.equals("alquilado") || estadoN.equals("discontinuado")) {
                 seguir = true;//si el estado escrito es valido seguira adelante
 
             } else {
@@ -417,14 +435,19 @@ public class Libro {
                 IOException e) {
             System.out.println("se edito el libro");
         }
-    }//funciona, modifica el nombre y estado del libro
+    }// MODIFICA EL ESTADO Y NOMBRE DEL LIBRO
 
     public static void eliminar(BufferedReader reader) throws IOException {
-        RandomAccessFile raf = new RandomAccessFile(".//Libros.dat", "r");
+        RandomAccessFile raf = null;
+        try {
+            raf = new RandomAccessFile(".//Libros.dat", "r");
+        } catch (FileNotFoundException e) {
+            System.out.println("error con el fichero");
+        }
         boolean seguir = false;
 
         int idB = 0;//id que da el usuario
-        String estadoN = "descontinuado";//valor que se le pasara al libro para marcarlo como descontinuado
+        String estadoN = "discontinuado";//valor que se le pasara al libro para marcarlo como descontinuado
 
         int idd = 0;
         int poss = 0;
@@ -450,7 +473,7 @@ public class Libro {
 
         }
 
-        System.out.println("Elige el ID del libro que quieras alquilar");
+        System.out.println("Elige el ID del libro que quieras discontinuar");
         Libro.TodosLibros();
 
         //hasta que no meta el id correcto no saldra
@@ -525,12 +548,17 @@ public class Libro {
                 IOException e) {
 
         }
-    }//marca como descontinuado un libro, asi no permite que se pueda prestar, pero permanece en la base de datos
+    }//MARCA COMO DESCONTINUADO UN LIBRO
 
     public static void crear(BufferedReader reader) throws IOException, ParserConfigurationException, TransformerException {
 
         RandomAccessFile fichero = new RandomAccessFile(".//Libros.dat", "rw");
-        RandomAccessFile raf = new RandomAccessFile(".//Libros.dat", "r");
+        RandomAccessFile raf = null;
+        try {
+            raf = new RandomAccessFile(".//Libros.dat", "r");
+        } catch (FileNotFoundException e) {
+            System.out.println("error con el fichero");
+        }
 
         int pos = 0;
         int id = 0;
@@ -587,13 +615,18 @@ public class Libro {
         Main.menu();// vuelve a mostrar el menu
 
 
-    }//funciona, se crea un nuevo registro de libro
-
+    }//SE CREA UN LIBRO
 
     public static void devolver(BufferedReader reader) throws IOException {
         boolean fin = false;
 
-        RandomAccessFile raf = new RandomAccessFile(".//Libros.dat", "r");
+        RandomAccessFile raf = null;
+        try {
+            raf = new RandomAccessFile(".//Libros.dat", "r");
+        } catch (FileNotFoundException e) {
+            System.out.println("error con el fichero");
+        }
+
         int idB = 0;
         boolean seguir = false;
         String estadoN = "disponible";
@@ -665,10 +698,10 @@ public class Libro {
             do {
                 System.out.println("escribe el ID de tu usuario para proceder a devolver el libro");
                 int numero = Integer.parseInt(reader.readLine());
-                if (existe(numero)) {
+                if (Cliente.existe(numero)) {
                     //ver que no exceda el limite
                     int pos = 0;
-                    int id=0;
+                    int id;
                     int Mlibros;
 
                     char[] nombre = new char[20];
@@ -785,10 +818,6 @@ public class Libro {
                             seguir=true;
                         }
 
-
-
-
-
                     }catch (IOException e) {
 
                     }
@@ -797,11 +826,16 @@ public class Libro {
                 }
             }while (!seguir);
         }
-    }//funciona
+    }//EDITA EL ESTADO DE UN LIBRO Y RESTA UN ALQUILER AL USUARIO
 
     public static void librosPrestados() throws FileNotFoundException {
 
-        RandomAccessFile raf = new RandomAccessFile(".//Libros.dat", "r");
+        RandomAccessFile raf = null;
+        try {
+            raf = new RandomAccessFile(".//Libros.dat", "r");
+        } catch (FileNotFoundException e) {
+            System.out.println("error con el fichero");
+        }
 
         char[] apellidos = new char[20];
         char a;
@@ -828,7 +862,7 @@ public class Libro {
                 String apellidos2 = new String(apellidos);
                 String estado2 = new String(estado);
 
-                if (!estado2.trim().equals("descontinuado") && !estado2.trim().equals("disponible")) {
+                if (!estado2.trim().equals("discontinuado") && !estado2.trim().equals("disponible")) {
                     System.out.println("ID: " + id + " nombre: " + apellidos2.trim() + " estado: " + estado2.trim());
 
                 }
@@ -849,42 +883,9 @@ public class Libro {
         }
 
 
-    }//funciona
+    }//MUESTRA LOS LIBROS ALQUILADOS
 
 
 
-    static boolean existe(int numero) throws FileNotFoundException {
-        RandomAccessFile raf = new RandomAccessFile(".//Clientes.dat", "r");
-
-        int pos = 0, id;
-
-
-        try {
-            while (true) {
-                raf.seek(pos);
-                id = raf.readInt();
-
-
-                if (id == numero) {
-                    return true;
-
-                }
-
-                if (raf.getFilePointer() == raf.length()) {
-                    break;
-                } else {
-                    pos += 48;
-                }
-
-
-            }
-        } catch (
-                IOException e) {
-            System.out.println("Ya se busco el cliente");
-        }
-
-
-        return false;
-    }//existe id cliente
 
 }
